@@ -3,7 +3,7 @@ import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/web';
 import LightningFS from '@isomorphic-git/lightning-fs';
 
-import {MemoryFsBackend} from '../src/services/memoryFsBackend';
+import {MemoryFsBackend} from '../apps/native/src/services/memoryFsBackend';
 
 globalThis.Buffer = Buffer;
 

@@ -1,12 +1,24 @@
 # Kiri
 
-Kiri is a local, read-only React Native desktop viewer for exploring repository topography on **macOS** and **iPadOS**. The MVP focuses on cloning public git repositories and browsing highlighted source files in a fixed 3-zone layout.
+Kiri is a local, read-only viewer for exploring repository topography. Clone public git repositories into virtual sandbox storage and browse syntax-highlighted source files in a fixed 3-zone workspace.
+
+## Monorepo layout
+
+```
+kiri/
+├── apps/
+│   ├── web/      # Vite + React + coss-ui + Effect Atom (primary)
+│   └── native/   # React Native macOS + iPadOS shell
+├── packages/
+│   └── domain/   # Shared Effect Schema + file tree utilities
+└── scripts/
+```
 
 ## MVP scope
 
 - Clone public git repositories into **virtual sandbox storage** (LightningFS + isomorphic-git)
-- Browse a file tree and view syntax-highlighted code in a read-only Shiki WebView canvas
-- Persist cloned repo snapshots via AsyncStorage (no native filesystem paths)
+- Browse a file tree and view syntax-highlighted code in a read-only canvas
+- Persist cloned repo snapshots (localStorage on web, AsyncStorage on native)
 - No editing, local execution, commenting, or Cursor Agent SDK integration
 
 ## Layout
@@ -15,73 +27,63 @@ Kiri is a local, read-only React Native desktop viewer for exploring repository 
 ┌──────────────────────────────────────────────────────────────┐
 │                      KIRI WORKSPACE                          │
 ├──────┬────────────────────┬────────────────────────────────┤
-│ Repo │ File Tree (260px)    │ Immutable Code Canvas (flex)   │
-│ Rail │                      │ Shiki via WebView              │
-│ 70px │                      │                                │
+│ Repo │ File Tree (280px)    │ Immutable Code Canvas (flex)   │
+│ Rail │                      │ Shiki highlighting           │
+│ 72px │                      │                                │
 └──────┴────────────────────┴────────────────────────────────┘
 ```
 
 ## Requirements
 
-- Node.js 20+
-- npm
-- Xcode 16+ (macOS + iPad simulator builds)
-- CocoaPods
+- Bun 1.2+ (or Node.js 20+)
+- Xcode 16+ (native macOS + iPad simulator builds)
+- CocoaPods (native only)
 
 ## Setup
 
 ```bash
-npm install
-cd ios && pod install && cd ..
-cd macos && pod install && cd ..
+bun install
+cd apps/native/ios && pod install && cd ../../..
+cd apps/native/macos && pod install && cd ../../..
 ```
 
 ## Run
 
-**Recommended** — starts Metro and the app together:
+### Web (recommended for development)
 
 ```bash
-npm run dev:macos    # macOS
-npm run dev:ios      # iPad simulator
+bun run dev:web
 ```
 
-If you see **"No script URL provided"**, Metro is not reachable from the app. Use `npm run dev:macos` from the project root, or keep `npm start` running in a separate terminal before `npm run macos`. A clean rebuild after pulling (`npx react-native run-macos --no-packager`) may be required after native fixes.
+Opens the cartographic workspace at `http://localhost:5173`.
 
-Or use two terminals (Metro does not stay running if you stop it before launching the app):
+### Native macOS / iPad
 
 ```bash
-# Terminal 1
-npm start
-
-# Terminal 2 (from project root, not macos/)
-npm run macos
+bun run dev:macos    # macOS
+bun run dev:ios      # iPad simulator
 ```
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev:macos` | Start Metro + macOS app (recommended) |
-| `npm run dev:ios` | Start Metro + iPad simulator (recommended) |
-| `npm start` | Metro bundler only |
-| `npm run macos` | Build and run macOS app (requires Metro in another terminal) |
-| `npm run ios` | Build and run on iPad Pro 13-inch simulator (requires Metro) |
-| `npm run typecheck` | TypeScript check |
-| `npm run lint` | ESLint |
+| `bun run dev:web` | Start Vite web app |
+| `bun run dev:macos` | Start Metro + macOS app |
+| `bun run dev:ios` | Start Metro + iPad simulator |
+| `bun run typecheck` | Typecheck all packages |
+| `bun run build` | Build web app |
+| `bun run verify:clone` | Verify isomorphic-git clone in memory |
 
 ## Storage model
 
-Repositories are cloned into per-repo **LightningFS** instances backed by an in-memory virtual filesystem (React Native has no IndexedDB on the JS thread). Indexed file contents are kept in memory and snapshotted to AsyncStorage. macOS and iPadOS use the same code path — there is no direct host filesystem access.
+Repositories are cloned into per-repo **LightningFS** instances. Indexed file contents are snapshotted to persistent storage (localStorage on web, AsyncStorage on native). There is no direct host filesystem access.
 
 MVP guardrails:
 
 - Max ~512 KB per indexed file
 - Max ~2,000 indexed files per repository
 
-## Shiki highlighting
-
-The code canvas loads an inline HTML shell that fetches Shiki from `esm.sh` at runtime. Network access is required for first-load syntax highlighting; a plain-text fallback renders if Shiki fails to load.
-
 ## Future integration
 
-Post-MVP agent workflows can hook into [`src/integrations/cursorAgent.ts`](src/integrations/cursorAgent.ts) via `@cursor/sdk`.
+Post-MVP agent workflows can hook into [`apps/native/src/integrations/cursorAgent.ts`](apps/native/src/integrations/cursorAgent.ts) via `@cursor/sdk`.

@@ -35,6 +35,11 @@ local.properties
 !debug.keystore
 .kotlin/
 
+# Turborepo
+.turbo/
+dist/
+*.tsbuildinfo
+
 # node.js
 #
 node_modules/
