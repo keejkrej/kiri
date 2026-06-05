@@ -1,8 +1,11 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-import {CloneRepoModal} from '../components/CloneRepoModal';
 import {useRepository} from '../store/RepositoryContext';
+
+type Props = {
+  onClonePress: () => void;
+};
 
 function repoInitials(name: string): string {
   const parts = name.split(/[-_]/).filter(Boolean);
@@ -12,13 +15,11 @@ function repoInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-export function RepoRail() {
+export function RepoRail({onClonePress}: Props) {
   const {state, selectRepository} = useRepository();
-  const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <>
-      <View style={styles.container}>
+    <View style={styles.container}>
         <Text style={styles.header}>KIRI</Text>
         <ScrollView
           contentContainerStyle={styles.list}
@@ -37,16 +38,11 @@ export function RepoRail() {
         </ScrollView>
         <Pressable
           style={styles.addButton}
-          onPress={() => setModalVisible(true)}
+          onPress={onClonePress}
           accessibilityLabel="Clone repository">
           <Text style={styles.addLabel}>+</Text>
         </Pressable>
       </View>
-      <CloneRepoModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-      />
-    </>
   );
 }
 

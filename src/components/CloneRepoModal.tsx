@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   ActivityIndicator,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -22,6 +21,10 @@ export function CloneRepoModal({visible, onClose}: Props) {
   const isBusy =
     state.cloneStatus === 'cloning' || state.cloneStatus === 'indexing';
 
+  if (!visible) {
+    return null;
+  }
+
   const handleClone = async () => {
     try {
       await cloneRepo(url);
@@ -40,58 +43,64 @@ export function CloneRepoModal({visible, onClose}: Props) {
         : null;
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Clone Repository</Text>
-          <Text style={styles.subtitle}>
-            Enter a public git URL. Files are stored in virtual sandbox storage.
-          </Text>
-          <TextInput
-            value={url}
-            onChangeText={setUrl}
-            placeholder="https://github.com/org/repo.git"
-            placeholderTextColor="#6e7681"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-            style={styles.input}
-            editable={!isBusy}
-          />
-          {statusLabel ? (
-            <View style={styles.statusRow}>
-              <ActivityIndicator color="#58a6ff" size="small" />
-              <Text style={styles.statusText}>{statusLabel}</Text>
+    <View style={styles.overlay} pointerEvents="box-none">
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        <Pressable onPress={() => undefined}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Clone Repository</Text>
+            <Text style={styles.subtitle}>
+              Enter a public git URL. Files are stored in virtual sandbox storage.
+            </Text>
+            <TextInput
+              value={url}
+              onChangeText={setUrl}
+              placeholder="https://github.com/org/repo.git"
+              placeholderTextColor="#6e7681"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+              style={styles.input}
+              editable={!isBusy}
+            />
+            {statusLabel ? (
+              <View style={styles.statusRow}>
+                <ActivityIndicator color="#58a6ff" size="small" />
+                <Text style={styles.statusText}>{statusLabel}</Text>
+              </View>
+            ) : null}
+            {state.cloneError ? (
+              <Text style={styles.errorText}>{state.cloneError}</Text>
+            ) : null}
+            <View style={styles.actions}>
+              <Pressable
+                style={[styles.button, styles.secondaryButton]}
+                onPress={onClose}
+                disabled={isBusy}>
+                <Text style={styles.secondaryLabel}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.button,
+                  styles.primaryButton,
+                  isBusy && styles.disabled,
+                ]}
+                onPress={handleClone}
+                disabled={isBusy || url.trim().length === 0}>
+                <Text style={styles.primaryLabel}>Clone</Text>
+              </Pressable>
             </View>
-          ) : null}
-          {state.cloneError ? (
-            <Text style={styles.errorText}>{state.cloneError}</Text>
-          ) : null}
-          <View style={styles.actions}>
-            <Pressable
-              style={[styles.button, styles.secondaryButton]}
-              onPress={onClose}
-              disabled={isBusy}>
-              <Text style={styles.secondaryLabel}>Cancel</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.button, styles.primaryButton, isBusy && styles.disabled]}
-              onPress={handleClone}
-              disabled={isBusy || url.trim().length === 0}>
-              <Text style={styles.primaryLabel}>Clone</Text>
-            </Pressable>
           </View>
-        </View>
-      </View>
-    </Modal>
+        </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(1, 4, 9, 0.72)',
