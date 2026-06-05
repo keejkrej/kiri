@@ -38,31 +38,32 @@ cd macos && pod install && cd ..
 
 ## Run
 
-Start Metro:
+**Recommended** — starts Metro and the app together:
 
 ```bash
+npm run dev:macos    # macOS
+npm run dev:ios      # iPad simulator
+```
+
+Or use two terminals (Metro does not stay running if you stop it before launching the app):
+
+```bash
+# Terminal 1
 npm start
-```
 
-macOS:
-
-```bash
+# Terminal 2 (from project root, not macos/)
 npm run macos
-```
-
-iPad simulator:
-
-```bash
-npm run ios
 ```
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Metro bundler |
-| `npm run macos` | Build and run macOS app |
-| `npm run ios` | Build and run on iPad Pro 13-inch simulator |
+| `npm run dev:macos` | Start Metro + macOS app (recommended) |
+| `npm run dev:ios` | Start Metro + iPad simulator (recommended) |
+| `npm start` | Metro bundler only |
+| `npm run macos` | Build and run macOS app (requires Metro in another terminal) |
+| `npm run ios` | Build and run on iPad Pro 13-inch simulator (requires Metro) |
 | `npm run typecheck` | TypeScript check |
 | `npm run lint` | ESLint |
 
