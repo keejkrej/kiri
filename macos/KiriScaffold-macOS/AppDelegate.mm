@@ -31,7 +31,21 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
+  NSString *metroPort =
+      [[[NSProcessInfo processInfo] environment] objectForKey:@"RCT_METRO_PORT"] ?: @"8081";
+  NSString *packagerHost =
+      [NSString stringWithFormat:@"localhost:%@", metroPort];
+
+  // Bypass RCTBundleURLProvider packager probing, which can return nil on macOS
+  // even when Metro is running.
+  return [RCTBundleURLProvider jsBundleURLForBundleRoot:@"index"
+                                         packagerHost:packagerHost
+                                       packagerScheme:@"http"
+                                            enableDev:YES
+                                   enableMinification:NO
+                                      inlineSourceMap:NO
+                                          modulesOnly:NO
+                                            runModule:YES];
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif

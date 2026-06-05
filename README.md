@@ -45,6 +45,8 @@ npm run dev:macos    # macOS
 npm run dev:ios      # iPad simulator
 ```
 
+If you see **"No script URL provided"**, Metro is not reachable from the app. Use `npm run dev:macos` from the project root, or keep `npm start` running in a separate terminal before `npm run macos`. A clean rebuild after pulling (`npx react-native run-macos --no-packager`) may be required after native fixes.
+
 Or use two terminals (Metro does not stay running if you stop it before launching the app):
 
 ```bash
